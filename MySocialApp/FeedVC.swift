@@ -14,6 +14,8 @@ class FeedVC: UIViewController,UITableViewDelegate,UITableViewDataSource {
     @IBOutlet weak var tableView: UITableView!
 
     @IBOutlet weak var signOutBtn: UIButton!
+    
+    var posts = [Post]()
     override func viewDidLoad() {
         super.viewDidLoad()
         tableView.delegate = self
@@ -22,7 +24,16 @@ class FeedVC: UIViewController,UITableViewDelegate,UITableViewDataSource {
         signOutBtn.imageView?.clipsToBounds = true
         
         DataService.ds.REF_POSTS.observe(.value, with: { (snapshot) in
-            
+            if let snapshot = snapshot.children.allObjects as? [FIRDataSnapshot] {
+                for snap in snapshot {
+                    if let postDict = snap.value as? [String:Any] {
+                        let key = snap.key
+                        let post = Post(postKey: key, postData: postDict)
+                        self.posts.append(post)
+                    }
+                }
+                self.tableView.reloadData()
+            }
         })
     }
     @IBAction func signOutBtnPressed(_ sender: UIButton) {
@@ -37,10 +48,15 @@ class FeedVC: UIViewController,UITableViewDelegate,UITableViewDataSource {
     }
     
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
-        return (tableView.dequeueReusableCell(withIdentifier: "PostCell") as? PostCell)!
+        if let cell = tableView.dequeueReusableCell(withIdentifier: "PostCell") as? PostCell {
+            cell.configureCell(post: posts[indexPath.row])
+            return cell
+        } else {
+            return PostCell()
+        }
     }
     
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-        return 3
+        return posts.count
     }
 }
