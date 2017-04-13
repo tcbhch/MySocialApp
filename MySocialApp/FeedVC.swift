@@ -19,7 +19,11 @@ class FeedVC: UIViewController,UITableViewDelegate,UITableViewDataSource {
         tableView.delegate = self
         tableView.dataSource = self
         signOutBtn.imageView?.contentMode = .scaleAspectFit
-        signOutBtn.imageView?.clipsToBounds = true 
+        signOutBtn.imageView?.clipsToBounds = true
+        
+        DataService.ds.REF_POSTS.observe(.value, with: { (snapshot) in
+            
+        })
     }
     @IBAction func signOutBtnPressed(_ sender: UIButton) {
         if KeychainWrapper.standard.removeObject(forKey: KEY_UID) == true {
